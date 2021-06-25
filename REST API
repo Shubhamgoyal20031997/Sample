@@ -1,0 +1,65 @@
+const express = require('express')
+const bodyParser = require('body-parser')
+const app = express()
+const mysql = require('mysql2')
+ 
+app.use(bodyParser.json())
+ 
+const conn = mysql.createConnection({
+  host: 'localhost',
+  user: 'root',
+  password: 'Shubham@123',
+  database: 'sampledb'
+})
+ 
+conn.connect((err) =>{
+  if(err) throw err
+  console.log('Mysql Connected...')
+})
+ 
+
+app.get('/api/persons',(req, res) => {
+  let sql = "SELECT * FROM persons"
+  let query = conn.query(sql, (err, results) => {
+    if(err) throw err
+    res.send(JSON.stringify({"status": 200, "error": null, "response": results}))
+  })
+})
+ 
+app.get('/api/persons/:ID',(req, res) => {
+    let sql = "SELECT * FROM persons WHERE ID="+req.params.ID
+    let query = conn.query(sql, (err, results) => {
+      if(err) throw err
+      res.send(JSON.stringify({"status": 200, "error": null, "response": results}))
+    })
+  })
+
+app.post('/api/persons',(req, res) => {
+    let data = {LastName: req.body.LastName,Address:req.body.Address, FirstName: req.body.FirstName, City:req.body.City, ID:req.body.ID};
+    let sql = "INSERT INTO persons SET ?"
+    let query = conn.query(sql, data,(err, results) => {
+      if(err) throw err;
+      res.send(JSON.stringify({"status": 200, "error": null, "response": results}))
+    })
+  })
+
+app.put('/api/persons/:id',(req, res) => {
+    let sql = "UPDATE persons SET LastName='"+req.body.LastName+"', FirstName='"+req.body.FirstName+"' WHERE ID="+req.params.id;
+    let query = conn.query(sql, (err, results) => {
+      if(err) throw err
+      res.send(JSON.stringify({"status": 200, "error": null, "response": results}))
+    })
+  })
+   
+
+  app.delete('/api/persons/:id',(req, res) => {
+    let sql = "DELETE FROM persons WHERE ID="+req.params.id+"";
+    let query = conn.query(sql, (err, results) => {
+      if(err) throw err;
+        res.send(JSON.stringify({"status": 200, "error": null, "response": results}))
+    })
+  })
+
+app.listen(3000,() =>{
+  console.log('Server is starting on port 3000...')
+})
